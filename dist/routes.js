@@ -1,4 +1,4 @@
-!function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.routes=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.routes = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"/index":[function(require,module,exports){
 
 var localRoutes = [];
 
@@ -91,10 +91,19 @@ var match = function (routes, uri, startAt) {
 
 		if (captures = uri.match(re)) {
 			for (var j = 1, len = captures.length; j < len; ++j) {
-				var key = keys[j-1],
-					val = typeof captures[j] === 'string'
-						? unescape(captures[j])
-						: captures[j];
+				var key = keys[j-1];
+
+                var val;
+                if (typeof captures[j] === 'string') {
+                    try {
+                        val = decodeURIComponent(captures[j])
+                    } catch(e) {
+                        val = unescape(captures[j]);
+                    }
+                } else {
+                        val = captures[j];
+                }
+
 				if (key) {
 					params[key] = val;
 				} else {
@@ -140,6 +149,26 @@ var Router = function(){
       this.routeMap[path] = fn;
     },
 
+    removeRoute: function(path) {
+      if (!path) throw new Error(' route requires a path');
+      if (!this.routeMap[path]) {
+        throw new Error('path does not exist: ' + path);
+      }
+
+      var match;
+      var newRoutes = [];
+
+      // copy the routes excluding the route being removed
+      for (var i = 0; i < this.routes.length; i++) {
+        var route = this.routes[i];
+        if (route.src !== path) {
+          newRoutes.push(route);
+        }
+      }
+      this.routes = newRoutes;
+      delete this.routeMap[path];
+    },
+
     match: function(pathname, startAt){
       var route = match(this.routes, pathname, startAt);
       if(route){
@@ -159,6 +188,5 @@ Router.Router = Router
 
 module.exports = Router
 
-},{}]},{},[1])
-(1)
+},{}]},{},[])("/index")
 });

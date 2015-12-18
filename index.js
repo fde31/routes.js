@@ -90,10 +90,19 @@ var match = function (routes, uri, startAt) {
 
 		if (captures = uri.match(re)) {
 			for (var j = 1, len = captures.length; j < len; ++j) {
-				var key = keys[j-1],
-					val = typeof captures[j] === 'string'
-						? unescape(captures[j])
-						: captures[j];
+				var key = keys[j-1];
+
+                var val;
+                if (typeof captures[j] === 'string') {
+                    try {
+                        val = decodeURIComponent(captures[j])
+                    } catch(e) {
+                        val = unescape(captures[j]);
+                    }
+                } else {
+                        val = captures[j];
+                }
+
 				if (key) {
 					params[key] = val;
 				} else {
